@@ -1,0 +1,104 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import sqlite3
+
+class DatabaseHandler:
+    def __init__(self, db_name):
+        self.connection = sqlite3.connect(db_name)
+        self.cursor = self.connection.cursor()
+        self.create_table()
+
+    def create_table(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS `contactinformation` (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                first_name TEXT,
+                middle_name TEXT,
+                last_name TEXT,
+                gender TEXT,
+                age TEXT,
+                home_address TEXT,
+                phone_number TEXT
+            )
+        """)
+        self.connection.commit()
+
+    def insert_contact(self, first_name, middle_name, last_name, gender, age, home_address, phone_number):
+        try:
+            self.cursor.execute("""
+                INSERT INTO `contactinformation` (
+                    first_name, middle_name, last_name, gender, age, home_address, phone_number
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (first_name, middle_name, last_name, gender, age, home_address, phone_number))
+            self.connection.commit()
+            return True
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {str(e)}')
+            return False
+
+    def update_contact(self, contact_id, first_name, middle_name, last_name, gender, age, home_address, phone_number):
+        try:
+            self.cursor.execute("""
+                UPDATE `contactinformation` SET
+                first_name = ?,
+                middle_name = ?,
+                last_name = ?,
+                gender = ?,
+                age = ?,
+                home_address = ?,
+                phone_number = ?
+                WHERE id = ?
+            """, (first_name, middle_name, last_name, gender, age, home_address, phone_number, contact_id))
+            self.connection.commit()
+            return True
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {str(e)}')
+            return False
+
+    def delete_contact(self, contact_id):
+        try:
+            self.cursor.execute("DELETE FROM `contactinformation` WHERE id = ?", (contact_id,))
+            self.connection.commit()
+            return True
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {str(e)}')
+            return False
+
+    def search_contacts(self, search_query):
+        try:
+            self.cursor.execute("""
+                SELECT * FROM `contactinformation`
+                WHERE LOWER(`first_name`) LIKE ? OR
+                      LOWER(`last_name`) LIKE ? OR
+                      LOWER(`home_address`) LIKE ? OR
+                      LOWER(`phone_number`) LIKE ?
+            """, ('%' + search_query + '%', '%' + search_query + '%', '%' + search_query + '%', '%' + search_query + '%'))
+
+            return self.cursor.fetchall()
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {str(e)}')
+            return []
+
+    def fetch_all_contacts(self):
+        try:
+            self.cursor.execute("SELECT * FROM `contactinformation` ORDER BY `last_name` ASC")
+            return self.cursor.fetchall()
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {str(e)}')
+            return []
+
+class ContactManagementApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AlumniConnect")
+        self.root.geometry("780x400+0+0")
+        self.root.config(bg="Pink")
+
+        self.db_handler = DatabaseHandler("contactdata.db")
+
+        # Rest of the code remains unchanged
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = ContactManagementApp(root)
+    root.mainloop()
