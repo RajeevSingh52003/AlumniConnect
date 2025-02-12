@@ -1,5 +1,5 @@
 # AlumniConnect
-*AlumniConnect - Contact Management System*
+*AlumniConnect - Alumni Management System*
 
 *Description:*
 AlumniConnect is a simple contact management system developed using Tkinter in Python. It allows users to add, update, delete, and search for alumni contacts. The system uses SQLite as the backend database to store contact information.
